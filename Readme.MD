@@ -271,7 +271,7 @@ Agent 4 independently re-queries the source and asks GPT: "Is this extraction ac
 |-------------|-------------|
 | Persistent vector store | Replace FAISS with Pinecone or Weaviate for multi-document storage |
 | Async processing | Replace subprocess orchestration with Celery or LangGraph |
-| | ✅ REST API | FastAPI implemented — /analyze, /report, /health endpoints live |
+| ✅ REST API | FastAPI implemented — /analyze, /report, /health endpoints live |
 | Human-in-the-loop | Flag PARTIAL extractions for manual review before report generation |
 | Auto re-query | If confidence < 70%, automatically re-query with k=2 |
 | Multi-document batch | Process entire folders of contracts in one run |
