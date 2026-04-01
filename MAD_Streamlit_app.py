@@ -2,11 +2,14 @@
 # Multi-Agent Document Intelligence Pipeline — Streamlit UI
 # Runs all 4 agents sequentially, shows live progress + results.
 
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 import streamlit as st
 import os
 import json
 import subprocess
-import sys
+import shutil
 from datetime import datetime
 
 # ── PAGE CONFIG ──────────────────────────────────────────────
@@ -29,17 +32,6 @@ st.markdown("""
     .main-header h1 { color: white; font-size: 2rem; margin: 0; }
     .main-header p  { color: #aaaaaa; margin: 0.5rem 0 0 0; font-size: 0.95rem; }
 
-    .agent-card {
-        border: 1px solid #e0e0e0;
-        border-radius: 10px;
-        padding: 1rem 1.2rem;
-        margin-bottom: 0.8rem;
-        background: #fafafa;
-    }
-    .agent-card.running  { border-left: 4px solid #f59e0b; background: #fffbeb; }
-    .agent-card.done     { border-left: 4px solid #10b981; background: #f0fdf4; }
-    .agent-card.waiting  { border-left: 4px solid #d1d5db; background: #f9fafb; }
-
     .metric-box {
         background: #1a1a2e;
         color: white;
@@ -49,17 +41,6 @@ st.markdown("""
     }
     .metric-box .value { font-size: 2rem; font-weight: bold; color: #10b981; }
     .metric-box .label { font-size: 0.85rem; color: #aaaaaa; margin-top: 0.3rem; }
-
-    .field-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        padding: 0.7rem 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-    .field-label { font-weight: 600; color: #374151; font-size: 0.9rem; min-width: 200px; }
-    .field-value { color: #111827; font-size: 0.9rem; flex: 1; padding-left: 1rem; }
-    .field-not-found { color: #9ca3af; font-style: italic; font-size: 0.9rem; }
 
     .badge-supported    { background:#d1fae5; color:#065f46; padding:2px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
     .badge-not-found    { background:#f3f4f6; color:#6b7280; padding:2px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; }
@@ -88,10 +69,14 @@ st.markdown("""
 # ── HELPER: RUN AGENT SCRIPT ─────────────────────────────────
 def run_agent(script_name):
     """Runs an agent script as a subprocess. Returns (success, output)."""
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
     result = subprocess.run(
         [sys.executable, script_name],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        env=env,
         cwd=os.path.dirname(os.path.abspath(__file__))
     )
     success = result.returncode == 0
@@ -116,6 +101,26 @@ def status_badge(status):
     cls, label = mapping.get(status, ("badge-not-found", status))
     return f'<span class="{cls}">{label}</span>'
 
+# ── HELPER: CLEAR ALL RESULTS ────────────────────────────────
+def clear_results():
+    """Deletes all pipeline output files and folders."""
+    files_to_clear = [
+        "agent1_metadata.json",
+        "agent2_extractions.json",
+        "agent3_contract_report.pdf",
+        "agent4_validation_report.json",
+        "sample_document.pdf"
+    ]
+    folders_to_clear = ["agent_faiss_index"]
+
+    for f in files_to_clear:
+        if os.path.exists(f):
+            os.remove(f)
+
+    for folder in folders_to_clear:
+        if os.path.exists(folder):
+            shutil.rmtree(folder)
+
 # ── SIDEBAR ──────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### ⚙️ Pipeline Control")
@@ -134,6 +139,14 @@ with st.sidebar:
         exists = "✅" if os.path.exists(fname) else "⬜"
         st.markdown(f"{exists} `{fname}`")
     st.markdown("---")
+
+    # ── CLEAR BUTTON IN SIDEBAR ──
+    if st.button("🗑️ Clear All Results", type="secondary"):
+        clear_results()
+        st.success("Cleared. Ready for a fresh run.")
+        st.rerun()
+
+    st.markdown("---")
     st.markdown("**Built by**")
     st.markdown("🚀 [ZenithQuest](https://github.com/JohnDBSDSN)")
 
@@ -147,7 +160,6 @@ uploaded_file = st.file_uploader(
 )
 
 if uploaded_file:
-    # Save uploaded file as sample_document.pdf (agents expect this name)
     with open("sample_document.pdf", "wb") as f:
         f.write(uploaded_file.getbuffer())
     st.success(f"✅ Uploaded: **{uploaded_file.name}** ({uploaded_file.size // 1024} KB)")
@@ -208,10 +220,10 @@ if agent2_data and agent4_data:
     # — Metrics row —
     m1, m2, m3, m4 = st.columns(4)
 
-    total    = agent4_data["total_fields"]
-    supported= agent4_data["supported"]
-    flags    = agent4_data["flags_raised"]
-    score    = agent4_data["pipeline_score"]
+    total     = agent4_data["total_fields"]
+    supported = agent4_data["supported"]
+    flags     = agent4_data["flags_raised"]
+    score     = agent4_data["pipeline_score"]
 
     with m1:
         st.markdown(f"""
@@ -254,7 +266,6 @@ if agent2_data and agent4_data:
         "confidentiality":    "Confidentiality Clause"
     }
 
-    # Build validation lookup
     val_lookup = {
         v["field"]: v for v in agent4_data["field_validations"]
     }
@@ -262,11 +273,11 @@ if agent2_data and agent4_data:
     extracted = agent2_data["extracted_fields"]
 
     for key, label in field_labels.items():
-        value     = extracted.get(key, "Not found")
-        val_data  = val_lookup.get(key, {})
-        status    = val_data.get("status", "UNKNOWN")
-        confidence= val_data.get("confidence", 0)
-        badge     = status_badge(status)
+        value      = extracted.get(key, "Not found")
+        val_data   = val_lookup.get(key, {})
+        status     = val_data.get("status", "UNKNOWN")
+        confidence = val_data.get("confidence", 0)
+        badge      = status_badge(status)
 
         col_label, col_value, col_status, col_conf = st.columns([2, 4, 1.5, 1])
         with col_label:
@@ -294,6 +305,12 @@ if agent2_data and agent4_data:
                 mime="application/pdf",
                 type="primary"
             )
+
+else:
+    # ── BLANK STATE — shown when no results exist ────────────
+    st.markdown("---")
+    st.markdown("### 📊 Pipeline Results")
+    st.info("No results yet. Upload a PDF and click **Run All Agents** to begin.")
 
 # ── FOOTER ───────────────────────────────────────────────────
 st.markdown("""
