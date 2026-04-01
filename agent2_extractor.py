@@ -1,7 +1,7 @@
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
-﻿# agent2_extractor.py
+# agent2_extractor.py
 # Agent 2 — Extraction Agent
 # Loads FAISS index from Agent 1, runs semantic search queries,
 # extracts key contract fields using GPT, saves structured JSON.

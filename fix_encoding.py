@@ -1,23 +1,22 @@
-import sys
+import os
 
 files = [
     'agent1_loader.py',
-    'agent2_extractor.py', 
+    'agent2_extractor.py',
     'agent3_generator.py',
     'agent4_validator.py'
 ]
 
-fix_line = "import sys\nsys.stdout.reconfigure(encoding='utf-8')\n\n"
-
 for filename in files:
-    with open(filename, 'r', encoding='utf-8') as f:
-        content = f.read()
+    # Read raw bytes
+    with open(filename, 'rb') as f:
+        raw = f.read()
     
-    # Only add if not already present
-    if "sys.stdout.reconfigure" not in content:
-        content = fix_line + content
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print(f'Fixed: {filename}')
-    else:
-        print(f'Already fixed: {filename}')
+    # Remove ALL BOM occurrences anywhere in file
+    raw = raw.replace(b'\xef\xbb\xbf', b'')
+    
+    # Write back as clean bytes
+    with open(filename, 'wb') as f:
+        f.write(raw)
+    
+    print('Fixed: ' + filename)

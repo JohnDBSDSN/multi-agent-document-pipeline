@@ -1,7 +1,7 @@
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 
-﻿# agent4_validator.py
+# agent4_validator.py
 # Agent 4 — Validation Agent
 # Cross-checks Agent 2 extractions against source chunks in FAISS.
 # Scores confidence per field. Flags low-confidence or missing fields.
