@@ -1,3 +1,6 @@
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 """
 ============================================================
 Multi-Agent Document Intelligence Pipeline
@@ -111,7 +114,7 @@ def agent1_load_document(pdf_path: str, index_folder: str = "agent_faiss_index")
     with open("agent1_metadata.json", "w") as f:
         json.dump(metadata, f, indent=2)
     
-    print(f"\n[Step 5] Metadata saved → agent1_metadata.json")
+    print(f"\n[Step 5] Metadata saved -> agent1_metadata.json")
     
     # ── Agent 1 Complete ──────────────────────────────────
     result = {

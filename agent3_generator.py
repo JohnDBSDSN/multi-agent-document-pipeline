@@ -1,6 +1,9 @@
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 # agent3_generator.py
 # Agent 3 — Report Generator
-# Reads Agent 2 extraction JSON → generates a formatted PDF report
+# Reads Agent 2 extraction JSON -> generates a formatted PDF report
 # using ReportLab. No LLM needed here — pure structured output.
 
 import os
@@ -107,7 +110,7 @@ footer_style = ParagraphStyle(
 )
 
 # ── 4. FIELD DISPLAY NAMES ───────────────────────────────────
-# Maps JSON keys → human-readable report labels
+# Maps JSON keys -> human-readable report labels
 field_labels = {
     "parties_involved":   "Parties Involved",
     "contract_date":      "Contract Date",
@@ -199,6 +202,6 @@ story.append(Paragraph(
 # ── 6. BUILD & SAVE PDF ──────────────────────────────────────
 doc.build(story)
 
-print(f"[Agent 3] PDF report generated → {output_pdf}")
+print(f"[Agent 3] PDF report generated -> {output_pdf}")
 print(f"[Agent 3] Fields rendered: {found_count} extracted, {not_found_count} not found")
 print("\n[Agent 3] Complete. Hand-off to Agent 4 ready.")

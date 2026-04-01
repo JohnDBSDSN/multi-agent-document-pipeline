@@ -1,4 +1,7 @@
-# agent4_validator.py
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
+﻿# agent4_validator.py
 # Agent 4 — Validation Agent
 # Cross-checks Agent 2 extractions against source chunks in FAISS.
 # Scores confidence per field. Flags low-confidence or missing fields.
@@ -157,9 +160,9 @@ for field_name, extracted_value in extracted_fields.items():
 
     # Console output
     status_icon = {
-        "SUPPORTED":     "✓",
+        "SUPPORTED":     "OK",
         "PARTIAL":       "~",
-        "NOT_SUPPORTED": "✗",
+        "NOT_SUPPORTED": "FAIL",
         "NOT_FOUND":     "–",
         "UNKNOWN":       "?"
     }.get(parsed["status"], "?")
@@ -205,7 +208,7 @@ print(f"{'='*50}")
 if overall_flags:
     print("\n  FLAGS:")
     for flag_item in overall_flags:
-        print(f"    → {flag_item['field']}: {flag_item['flag']}")
+        print(f"    -> {flag_item['field']}: {flag_item['flag']}")
 
-print(f"\n[Agent 4] Report saved → {output_file}")
+print(f"\n[Agent 4] Report saved -> {output_file}")
 print("[Agent 4] Pipeline complete. Ready for Streamlit UI.")

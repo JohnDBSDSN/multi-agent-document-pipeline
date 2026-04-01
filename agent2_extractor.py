@@ -1,4 +1,7 @@
-# agent2_extractor.py
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
+﻿# agent2_extractor.py
 # Agent 2 — Extraction Agent
 # Loads FAISS index from Agent 1, runs semantic search queries,
 # extracts key contract fields using GPT, saves structured JSON.
@@ -93,7 +96,7 @@ for field_name, query in extraction_queries.items():
 
     if not docs:
         extracted_fields[field_name] = "Not found"
-        print(f"  ✗ {field_name}: No relevant chunk found")
+        print(f"  FAIL {field_name}: No relevant chunk found")
         continue
 
     top_chunk = docs[0].page_content
@@ -111,7 +114,7 @@ for field_name, query in extraction_queries.items():
         "source_chunk_preview": top_chunk[:200] + "..." if len(top_chunk) > 200 else top_chunk
     })
 
-    print(f"  ✓ {field_name}: {extracted_value}")
+    print(f"  OK {field_name}: {extracted_value}")
 
 # ── 8. SAVE OUTPUT JSON ──────────────────────────────────────
 output = {
@@ -129,7 +132,7 @@ with open(output_file, "w") as f:
 
 print(f"\n[Agent 2] Extraction complete.")
 print(f"[Agent 2] {len(extracted_fields)} fields extracted.")
-print(f"[Agent 2] Results saved → {output_file}")
+print(f"[Agent 2] Results saved -> {output_file}")
 print("\n--- EXTRACTION SUMMARY ---")
 for field, value in extracted_fields.items():
     print(f"  {field}: {value}")
