@@ -1,0 +1,9 @@
+.env
+multi_agent_env/
+__pycache__/
+*.pyc
+agent_faiss_index/
+agent1_metadata.json
+agent2_extractions.json
+agent3_contract_report.pdf
+agent4_validation_report.json
