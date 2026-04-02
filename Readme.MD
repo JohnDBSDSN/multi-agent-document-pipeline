@@ -35,7 +35,7 @@ The Streamlit UI ties all four agents together — one click, live progress, dow
 
 ## 🖥️ Live Demo
 
-> 📺 **[Watch the full demo on YouTube](#)** ← *(link added after upload)*
+> 📺 **[https://www.youtube.com/watch?v=Jp7Hv53QTv0](#)** ← *(link added after upload)*
 
 ---
 
